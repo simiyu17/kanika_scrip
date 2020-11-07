@@ -1,9 +1,6 @@
 ## Install the Requirements
 Change directory to main folder in this case `kanika_scrip>` and run `pip3 install -r requirements.txt` to install script dependencies.
 
-`sudo apt install tesseract`  or `brew install tesseract` brew install tesseract for mac
-`sudo apt install tesseract-ocr`  or `brew install tesseract-ocr` for mac
-
 ## Necessary Update (Optional)
 Open `app.py` and make the following changes:
 - Go to line 6 and point `source_path` to your source folder (Folder containing your files), or ignore this and provide it when you run the script below as a parameter.
