@@ -159,3 +159,16 @@ def convert_pdf_to_image_and_save(file_path, save_dir):
     pages = convert_from_path(file_path)
     for page in pages:
         page.save(f'{save_dir}/{file_name}.jpg', 'JPEG')
+
+
+# Search a WHOLE word in a given text
+def words_found_in_text(file_text, search_text):
+    '''
+    :param file_text: Text extracted from a document
+    :param search_text: The keyword to be searched in the text
+    :return:
+    '''
+    res_search = re.search(search_text, file_text, flags=re.IGNORECASE)
+    if res_search:
+        return True
+    return False

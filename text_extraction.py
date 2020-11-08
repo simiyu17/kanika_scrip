@@ -5,7 +5,7 @@ from important_functions import *
 
 # Overal text extraction from a file
 def extract_text_in_file(file_path, custom_config):
-    file_text = text_from_licence_image_file_with_cropping_small(file_path, custom_config)
+    file_text = text_from_license(file_path, custom_config)
     delete_file(file_path)
     return file_text
 
@@ -86,6 +86,7 @@ def text_from_licence_image_file_with_cropping_small(file_path, custom_config):
     delete_file(f'tempfiles/bg_rmd.png')
 
     angle = determine_skew(get_grayscale(img))
+    print(f'Angle of rotation ***************** {angle}')
     rotated = rotate(img, angle, (0, 0, 0))
     # cv2.imwrite('rotated.png', rotated)
 
@@ -141,32 +142,40 @@ def text_from_licence_image_file_with_cropping(file_path, custom_config):
 
 
 # Extract text from a licence size image file
-def text_from_licence_image_file2(file_path, custom_config):
-    img = cv2.imread(file_path)
+def text_from_license(file_path, custom_config):
+    im = Image.open(file_path)
+    background_removed = remove_single_color_background(im)
+    background_removed.save(f'tempfiles/bg_rmd.png')
+    img = cv2.imread(f'tempfiles/bg_rmd.png')
     img = resize_image_size(img)
-    deskew = deskew_image(img)
+    delete_file(f'tempfiles/bg_rmd.png')
 
-    alpha = 1.5  # Contrast control (1.0-3.0)
-    beta = -126  # Brightness control (0-100)
-    '''alpha 1  beta 0      --> no change  
-    0 < alpha < 1        --> lower contrast  
-    alpha > 1            --> higher contrast  
-    -127 < beta < +127   --> good range for brightness values'''
-    adjusted = cv2.convertScaleAbs(deskew, alpha=alpha, beta=beta)
-    # cv2.imwrite('adjusted.png', adjusted)
+    angle = determine_skew(get_grayscale(img))
+    rotated = rotate(img, angle, (0, 0, 0))
+    # cv2.imwrite('rotated.png', rotated)
 
-    back_removed = remove_water_mask(adjusted)
-    adaptive_thresh = binarization(back_removed, 11, 2)
+    grayed = get_grayscale(rotated)
+    # cv2.imwrite('grayed.png', grayed)
+    # blurred = cv2.GaussianBlur(grayed, (5, 5), 0)
+    blurred = cv2.medianBlur(grayed, 3)
+    # blurred = cv2.bilateralFilter(grayed, 9, 75, 75)
+    # blurred = cv2.threshold(grayed, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # cv2.imwrite('blurred.png', blurred)
 
-    # cv2.imwrite('deskewed.png', deskew)
-    normalized = cv2.normalize(deskew, None, 0, 255, cv2.NORM_MINMAX)
-    # cv2.imwrite('normalized.png', normalized)
-
-    # cv2.imwrite('adaptive_thresh.png', adaptive_thresh)
-    processed = process_image_for_ocr('adaptive_thresh.png')
-    # cv2.imwrite('back_removed.png', back_removed)
-    # cv2.imwrite('ddddddddss2.png', processed)
-    return pytesseract.image_to_string(adaptive_thresh, config=custom_config)
+    file_text = pytesseract.image_to_string(blurred, config=custom_config)
+    if words_found_in_text(file_text, 'GOVT.'):
+        return file_text
+    else:
+        for t in range(0, 5):
+            rotated = rotate(rotated, 90, (0, 0, 0))
+            grayed = get_grayscale(rotated)
+            blurred = cv2.medianBlur(grayed, 3)
+            # cv2.imwrite('blurred' + str(t) + '.png', blurred)
+            file_text = pytesseract.image_to_string(blurred, config=custom_config)
+            print(file_text)
+            if words_found_in_text(file_text, 'GOVT.'):
+                return file_text
+    return 'IMAGE TEXT NOT CLEAR !!!!!!!'
 
 
 # Extract text from a receipt size image file

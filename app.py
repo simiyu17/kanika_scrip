@@ -3,7 +3,7 @@ from text_extraction import *
 import pandas as pd
 import argparse
 
-source_path = expanduser('~') + '/Downloads/kanika/source'
+source_path = expanduser('~') + '/Downloads/kanika/source2'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source_dir", help="1 This should be the source directory of files to be processed", type=str, required=False)
