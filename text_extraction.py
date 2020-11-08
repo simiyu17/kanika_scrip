@@ -172,7 +172,7 @@ def text_from_license(file_path, custom_config):
             blurred = cv2.medianBlur(grayed, 3)
             # cv2.imwrite('blurred' + str(t) + '.png', blurred)
             file_text = pytesseract.image_to_string(blurred, config=custom_config)
-            print(file_text)
+            # print(file_text)
             if words_found_in_text(file_text, 'GOVT.'):
                 return file_text
     return 'IMAGE TEXT NOT CLEAR !!!!!!!'
